@@ -132,6 +132,27 @@ async def zeleph(ctx):
         await ctx.message.add_reaction("🦊")
     except discord.HTTPException as e:
         print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
+        
+@bot.command()
+@commands.is_owner()  # seule la personne propriétaire du bot peut utiliser
+async def reload(ctx, extension: str = None):
+    """Recharge une extension ou toutes"""
+    if extension:
+        try:
+            await bot.reload_extension(f"cogs.{extension}")
+            await ctx.send(f"✅ Extension `{extension}` rechargée.")
+        except Exception as e:
+            await ctx.send(f"❌ Erreur en rechargant `{extension}`: `{e}`")
+    else:
+        reloaded = []
+        for filename in os.listdir("./cogs"):
+            if filename.endswith(".py"):
+                try:
+                    await bot.reload_extension(f"cogs.{filename[:-3]}")
+                    reloaded.append(filename)
+                except Exception as e:
+                    await ctx.send(f"❌ Erreur dans `{filename}`: `{e}`")
+        await ctx.send(f"✅ Extensions rechargées : {', '.join(reloaded)}")
 
 token = os.environ.get('TOKEN')
 print("TOKEN chargé ? ", 'TOKEN' in os.environ)
