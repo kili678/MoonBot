@@ -126,5 +126,5 @@ async def Bonjour(ctx):
     await ctx.send(f"ta gueule {ctx.author}")
 
 
-token = os.environ['TOKEN']
+token = os.environ['MTM5NjAwMzk0Nzc4ODg5ODQ1Nw.GOkuOw.vzd-BxJKh1vg5oMXoKJRZQtQaLpSnX8L8BS-pA']
 bot.run(token)
