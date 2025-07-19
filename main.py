@@ -144,6 +144,13 @@ async def zeleph(ctx):
         await ctx.message.add_reaction("🦊")
     except discord.HTTPException as e:
         print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
+@bot.command()
+async def Zeleph(ctx):
+    try:
+        # Réagit au message avec l'émoji renard
+        await ctx.message.add_reaction("🦊")
+    except discord.HTTPException as e:
+        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
         
 @bot.command()
 async def killian(ctx):
@@ -172,6 +179,13 @@ async def nuggets(ctx):
     try:
         # Réagit au message avec l'émoji renard
         await ctx.message.add_reaction("🐔")
+    except discord.HTTPException as e:
+        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
+@bot.command()        
+async def fafa(ctx):
+    try:
+        # Réagit au message avec l'émoji renard
+        await ctx.message.add_reaction("🍆")
     except discord.HTTPException as e:
         print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
         
