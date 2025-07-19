@@ -127,6 +127,8 @@ async def Bonjour(ctx):
 
 
 token = os.environ.get('TOKEN')
+print("TOKEN chargé ? ", 'TOKEN' in os.environ)
+print("Longueur du token :", len(os.environ.get('TOKEN', '')))
 if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
