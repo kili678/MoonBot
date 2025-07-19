@@ -126,5 +126,9 @@ async def Bonjour(ctx):
     await ctx.send(f"ta gueule {ctx.author}")
 
 
-token = os.environ['TOKEN']
+token = os.environ.get('TOKEN')
+if not token:
+    print("Erreur : variable d'environnement TOKEN absente ou vide.")
+    exit(1)
+
 bot.run(token)
