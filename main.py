@@ -77,7 +77,7 @@ async def periodic_task():
                         if role_pecheurs in member.roles and role_peche in member.roles:
                             joueur = member
                             break
-                    players[peche] = joueur.name if joueur else "aucun"
+                    players[peche] = joueur.name if joueur else "Place vacante"
 
             send_data_to_api(owner_name, players)
             print(
