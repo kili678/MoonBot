@@ -152,6 +152,28 @@ async def killian(ctx):
         await ctx.message.add_reaction("🥵")
     except discord.HTTPException as e:
         print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
+@bot.command()
+async def Killian(ctx):
+    try:
+        # Réagit au message avec l'émoji renard
+        await ctx.message.add_reaction("🥵")
+    except discord.HTTPException as e:
+        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
+        
+@bot.command()
+async def Nuggets(ctx):
+    try:
+        # Réagit au message avec l'émoji renard
+        await ctx.message.add_reaction("🐔")
+    except discord.HTTPException as e:
+        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
+@bot.command()
+async def nuggets(ctx):
+    try:
+        # Réagit au message avec l'émoji renard
+        await ctx.message.add_reaction("🐔")
+    except discord.HTTPException as e:
+        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
         
 @bot.command()
 @commands.is_owner()  # seule la personne propriétaire du bot peut utiliser
