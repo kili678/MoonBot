@@ -124,7 +124,14 @@ async def bonjour(ctx):
 @bot.command()
 async def Bonjour(ctx):
     await ctx.send(f"ta gueule {ctx.author}")
-
+    
+@bot.command()
+async def zeleph(ctx):
+    try:
+        # Réagit au message avec l'émoji renard
+        await ctx.message.add_reaction("🦊")
+    except discord.HTTPException as e:
+        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
 
 token = os.environ.get('TOKEN')
 print("TOKEN chargé ? ", 'TOKEN' in os.environ)
