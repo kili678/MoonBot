@@ -172,5 +172,8 @@ print("Longueur du token :", len(os.environ.get('TOKEN', '')))
 if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
+    
+import threading
+threading.Thread(target=start).start()
 
 bot.run(token)
