@@ -4,6 +4,18 @@ from discord.ext import commands
 import requests
 import asyncio
 
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def start():
+    port = int(os.environ.get("PORT", 10000))  # Port imposé par Render
+    app.run(host="0.0.0.0", port=port)
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents = discord.Intents.all()
