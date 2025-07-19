@@ -189,6 +189,19 @@ async def fafa(ctx):
     except discord.HTTPException as e:
         print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
         
+@bot.event
+async def on_message(message):
+    # Empêche le bot de répondre à lui-même
+    if message.author == bot.user:
+        return
+
+    # Si le bot est mentionné
+    if bot.user in message.mentions:
+        await message.channel.send(f"FILS DE P*** {message.author.mention}, DEGAGE A ME MENTIONNER T'ES GRAND MORT SALOPE PIRE QUE L'EX DE MON CREATEUR ENCULE, VA BAISER AILLEURS JE SUIS APS TA CHIENNE 🤖")
+
+    # Permet au bot de traiter les commandes si besoin
+    await bot.process_commands(message)
+        
 @bot.command()
 @commands.is_owner()  # seule la personne propriétaire du bot peut utiliser
 async def reload(ctx, extension: str = None):
