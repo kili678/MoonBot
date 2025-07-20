@@ -148,6 +148,13 @@ async def on_message(message):
 
     if "nuggets" in message.content.lower():
         await message.add_reaction("🐔")  # Correction ici
+
+    if "kuzoki" in message.content.lower():
+        await message.add_reaction("💔")  # Correction ici
+
+    if "noisette" in message.content.lower():
+        await message.add_reaction("🌰")  # Correction ici
+        
     # Si le bot est mentionné
     if bot.user in message.mentions:
         await message.channel.send(
