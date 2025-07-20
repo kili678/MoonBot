@@ -194,7 +194,10 @@ async def on_message(message):
     # Empêche le bot de répondre à lui-même
     if message.author == bot.user:
         return
-
+    if "bonjour" in message.content.lower():
+        await message.channel.send(f"ta gueule {message.author}")
+    if "fafa" in message.content.lower():
+        await message.message.add_reaction("🍆")
     # Si le bot est mentionné
     if bot.user in message.mentions:
         await message.channel.send(f"FILS DE P*** {message.author.mention}, DEGAGE A ME MENTIONNER T'ES GRAND MORT SALOPE PIRE QUE L'EX DE MON CREATEUR ENCULE, VA BAISER AILLEURS JE SUIS APS TA CHIENNE 🤖")
