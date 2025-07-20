@@ -19,7 +19,7 @@ def start():
 intents = discord.Intents.default()
 intents.message_content = True
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix='', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 PECHEURS_ROLE = "Pécheurs"
 PECHE_S_CAPITAUX = [
@@ -127,68 +127,7 @@ async def on_disconnect():
 @bot.event
 async def on_resumed():
     print("[Bot] Reconnecté à Discord")
-
-
-@bot.command()
-async def bonjour(ctx):
-    await ctx.send(f"ta gueule {ctx.author}")
-
-@bot.command()
-async def Bonjour(ctx):
-    await ctx.send(f"ta gueule {ctx.author}")
     
-@bot.command()
-async def zeleph(ctx):
-    try:
-        # Réagit au message avec l'émoji renard
-        await ctx.message.add_reaction("🦊")
-    except discord.HTTPException as e:
-        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
-@bot.command()
-async def Zeleph(ctx):
-    try:
-        # Réagit au message avec l'émoji renard
-        await ctx.message.add_reaction("🦊")
-    except discord.HTTPException as e:
-        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
-        
-@bot.command()
-async def killian(ctx):
-    try:
-        # Réagit au message avec l'émoji renard
-        await ctx.message.add_reaction("🥵")
-    except discord.HTTPException as e:
-        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
-@bot.command()
-async def Killian(ctx):
-    try:
-        # Réagit au message avec l'émoji renard
-        await ctx.message.add_reaction("🥵")
-    except discord.HTTPException as e:
-        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
-        
-@bot.command()
-async def Nuggets(ctx):
-    try:
-        # Réagit au message avec l'émoji renard
-        await ctx.message.add_reaction("🐔")
-    except discord.HTTPException as e:
-        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
-@bot.command()
-async def nuggets(ctx):
-    try:
-        # Réagit au message avec l'émoji renard
-        await ctx.message.add_reaction("🐔")
-    except discord.HTTPException as e:
-        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
-@bot.command()        
-async def fafa(ctx):
-    try:
-        # Réagit au message avec l'émoji renard
-        await ctx.message.add_reaction("🍆")
-    except discord.HTTPException as e:
-        print(f"[Erreur] Impossible d'ajouter la réaction : {e}")
-
 @bot.event
 async def on_message(message):
     # Empêche le bot de répondre à lui-même
@@ -200,7 +139,15 @@ async def on_message(message):
 
     if "fafa" in message.content.lower():
         await message.add_reaction("🍆")  # Correction ici
+        
+   if "zeleph" in message.content.lower():
+        await message.add_reaction("🦊")  # Correction ici
 
+   if "killian" in message.content.lower():
+        await message.add_reaction("🥵")  # Correction ici
+
+   if "nuggets" in message.content.lower():
+        await message.add_reaction("🐔")  # Correction ici
     # Si le bot est mentionné
     if bot.user in message.mentions:
         await message.channel.send(
