@@ -140,13 +140,13 @@ async def on_message(message):
     if "fafa" in message.content.lower():
         await message.add_reaction("🍆")  # Correction ici
         
-   if "zeleph" in message.content.lower():
+    if "zeleph" in message.content.lower():
         await message.add_reaction("🦊")  # Correction ici
 
-   if "killian" in message.content.lower():
+    if "killian" in message.content.lower():
         await message.add_reaction("🥵")  # Correction ici
 
-   if "nuggets" in message.content.lower():
+    if "nuggets" in message.content.lower():
         await message.add_reaction("🐔")  # Correction ici
     # Si le bot est mentionné
     if bot.user in message.mentions:
