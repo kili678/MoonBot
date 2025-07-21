@@ -154,6 +154,12 @@ async def on_message(message):
 
     if "noisette" in message.content.lower():
         await message.add_reaction("🌰")  # Correction ici
+
+    if "pigeon" in message.content.lower():
+        await message.add_reaction("🐤")  # Correction ici
+
+    if "piaf" in message.content.lower():
+        await message.add_reaction("🐤")  # Correction ici
         
     # Si le bot est mentionné
     if bot.user in message.mentions:
