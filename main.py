@@ -150,7 +150,7 @@ async def on_message(message):
         await message.add_reaction("🐔")  # Correction ici
 
     if "kuzoki" in message.content.lower():
-        await message.add_reaction("💔")  # Correction ici
+        await message.add_reaction("🐺")  # Correction ici
 
     if "noisette" in message.content.lower():
         await message.add_reaction("🌰")  # Correction ici
