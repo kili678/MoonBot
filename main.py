@@ -161,6 +161,9 @@ async def on_message(message):
     if "piaf" in message.content.lower():
         await message.add_reaction("🐤")  # Correction ici
         
+    if "sakir" in message.content.lower():
+        await message.add_reaction("🦝")
+        
     # Si le bot est mentionné
     if bot.user in message.mentions:
         await message.channel.send(
