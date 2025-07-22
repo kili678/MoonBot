@@ -172,7 +172,40 @@ async def on_message(message):
 
     # Permet au bot de traiter les commandes si besoin
     await bot.process_commands(message)
-        
+    
+@bot.command(name="classement")
+async def classement(ctx):
+    guild = ctx.guild
+    role_pecheurs = discord.utils.get(guild.roles, name=PECHEURS_ROLE)
+
+    if not role_pecheurs:
+        await ctx.send(f"⚠️ Le rôle '{PECHEURS_ROLE}' est introuvable.")
+        return
+
+    classement = []
+
+    for peche in PECHE_S_CAPITAUX:
+        role_peche = discord.utils.get(guild.roles, name=peche)
+        if not role_peche:
+            classement.append((peche, 0))
+            continue
+
+        count = 0
+        for member in guild.members:
+            if role_pecheurs in member.roles and role_peche in member.roles:
+                count += 1
+        classement.append((peche, count))
+
+    # Trie le classement par nombre décroissant
+    classement.sort(key=lambda x: x[1], reverse=True)
+
+    # Formatage du message
+    msg = "**Classement des péchés capitaux :**\n"
+    for i, (peche, count) in enumerate(classement, 1):
+        msg += f"**{i}. {peche}** — {count} membre(s)\n"
+
+    await ctx.send(msg)       
+    
 @bot.command()
 @commands.is_owner()  # seule la personne propriétaire du bot peut utiliser
 async def reload(ctx, extension: str = None):
