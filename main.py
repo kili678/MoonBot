@@ -113,7 +113,34 @@ async def on_ready():
     print(f"Connecté à {len(bot.guilds)} serveur(s)")
     bot.loop.create_task(periodic_task())
 
+@bot.command(name="SakShow")
+async def sakshow(ctx):
+    """Ajoute le rôle 'SakShow' à l'utilisateur qui lance la commande"""
+    role_name = "SakShow"
+    guild = ctx.guild
 
+    # Chercher le rôle dans le serveur
+    role = discord.utils.get(guild.roles, name=role_name)
+
+    # Si le rôle n'existe pas, on le crée
+    if role is None:
+        try:
+            role = await guild.create_role(name=role_name, reason="Création pour la commande !SakShow")
+            await ctx.send(f"✅ Rôle `{role_name}` créé et attribué à {ctx.author.mention}.")
+        except discord.Forbidden:
+            await ctx.send("❌ Je n'ai pas la permission de créer des rôles.")
+            return
+
+    # Donner le rôle à l'utilisateur
+    if role in ctx.author.roles:
+        await ctx.send(f"ℹ️ Tu as déjà le rôle `{role_name}`, {ctx.author.mention}.")
+    else:
+        try:
+            await ctx.author.add_roles(role)
+            await ctx.send(f"✅ Rôle `{role_name}` attribué à {ctx.author.mention}.")
+        except discord.Forbidden:
+            await ctx.send("❌ Je n'ai pas la permission de donner ce rôle.")
+            
 @bot.event
 async def on_error(event, *args, **kwargs):
     print(f"[Erreur Bot] Événement {event} : {args}")
@@ -230,3 +257,4 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
