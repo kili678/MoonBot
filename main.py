@@ -115,12 +115,12 @@ async def on_ready():
 
 @bot.command(name="sakshow")
 async def sakshow(ctx):
-    """Ajoute le rôle 'SakShow' à l'utilisateur qui lance la commande"""
+    """Ajoute le rôle 'SakShow' (insensible à la casse) à l'utilisateur qui lance la commande"""
     role_name = "SakShow"
     guild = ctx.guild
 
-    # Chercher le rôle dans le serveur
-    role = discord.utils.get(guild.roles, name=role_name)
+    # Chercher le rôle sans tenir compte des majuscules
+    role = discord.utils.find(lambda r: r.name.lower() == role_name.lower(), guild.roles)
 
     # Si le rôle n'existe pas, on le crée
     if role is None:
@@ -133,11 +133,11 @@ async def sakshow(ctx):
 
     # Donner le rôle à l'utilisateur
     if role in ctx.author.roles:
-        await ctx.send(f"ℹ️ Tu as déjà le rôle `{role_name}`, {ctx.author.mention}.")
+        await ctx.send(f"ℹ️ Tu as déjà le rôle `{role.name}`, {ctx.author.mention}.")
     else:
         try:
             await ctx.author.add_roles(role)
-            await ctx.send(f"✅ Rôle `{role_name}` attribué à {ctx.author.mention}.")
+            await ctx.send(f"✅ Rôle `{role.name}` attribué à {ctx.author.mention}.")
         except discord.Forbidden:
             await ctx.send("❌ Je n'ai pas la permission de donner ce rôle.")
             
@@ -257,5 +257,6 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
