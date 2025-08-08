@@ -113,7 +113,7 @@ async def on_ready():
     print(f"Connecté à {len(bot.guilds)} serveur(s)")
     bot.loop.create_task(periodic_task())
 
-@bot.command(name="SakShow")
+@bot.command(name="sakshow")
 async def sakshow(ctx):
     """Ajoute le rôle 'SakShow' à l'utilisateur qui lance la commande"""
     role_name = "SakShow"
@@ -257,4 +257,5 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
