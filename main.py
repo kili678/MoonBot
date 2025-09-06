@@ -113,33 +113,6 @@ async def on_ready():
     print(f"Connecté à {len(bot.guilds)} serveur(s)")
     bot.loop.create_task(periodic_task())
 
-@bot.command(name="sakshow")
-async def sakshow(ctx):
-    """Ajoute le rôle 'SakShow' (insensible à la casse) à l'utilisateur qui lance la commande"""
-    role_name = "SakShow"
-    guild = ctx.guild
-
-    # Chercher le rôle sans tenir compte des majuscules
-    role = discord.utils.find(lambda r: r.name.lower() == role_name.lower(), guild.roles)
-
-    # Si le rôle n'existe pas, on le crée
-    if role is None:
-        try:
-            role = await guild.create_role(name=role_name, reason="Création pour la commande !SakShow")
-            await ctx.send(f"✅ Rôle `{role_name}` créé et attribué à {ctx.author.mention}.")
-        except discord.Forbidden:
-            await ctx.send("❌ Je n'ai pas la permission de créer des rôles.")
-            return
-
-    # Donner le rôle à l'utilisateur
-    if role in ctx.author.roles:
-        await ctx.send(f"ℹ️ Tu as déjà le rôle `{role.name}`, {ctx.author.mention}.")
-    else:
-        try:
-            await ctx.author.add_roles(role)
-            await ctx.send(f"✅ Rôle `{role.name}` attribué à {ctx.author.mention}.")
-        except discord.Forbidden:
-            await ctx.send("❌ Je n'ai pas la permission de donner ce rôle.")
             
 @bot.event
 async def on_error(event, *args, **kwargs):
@@ -162,7 +135,7 @@ async def on_message(message):
         return
 
     if "bonjour" in message.content.lower():
-        await message.channel.send(f"ta gueule {message.author}")
+        await message.channel.send(f"Bonjour {message.author} ! 🤗")
 
     if "fafa" in message.content.lower():
         await message.add_reaction("🍆")  # Correction ici
@@ -194,7 +167,7 @@ async def on_message(message):
     # Si le bot est mentionné
     if bot.user in message.mentions:
         await message.channel.send(
-            f"FILS DE P*** {message.author.mention}, DEGAGE A ME MENTIONNER T'ES GRAND MORT SALOPE PIRE QUE L'EX DE MON CREATEUR ENCULE, VA BAISER AILLEURS JE SUIS PAS TA CHIENNE 🤖"
+            f"Oui {message.author.mention} ?"
         )
 
     # Permet au bot de traiter les commandes si besoin
@@ -257,6 +230,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
