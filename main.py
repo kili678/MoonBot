@@ -31,7 +31,7 @@ def send_data_to_api(owner_name, players_dict):
     url = "https://siteapi-2.onrender.com/update"
     payload = {
         "owner": owner_name,
-        **players_dict  # unpack des joueurs par péché
+        "players": players_dict  # 👈 On regroupe tout dans une clé "players"
     }
     try:
         response = requests.post(url, json=payload, timeout=10)
@@ -72,25 +72,25 @@ async def periodic_task():
             role_pecheurs = discord.utils.get(guild.roles, name=PECHEURS_ROLE)
 
             players = {}
-            if not role_pecheurs:
-                print("[Erreur] Rôle 'Pécheurs' introuvable.")
-                players = {peche: "aucun" for peche in PECHE_S_CAPITAUX}
-            else:
-                # Pour chaque péché capital, cherche un membre qui a "Pécheurs" + ce rôle
-                for peche in PECHE_S_CAPITAUX:
-                    role_peche = discord.utils.get(guild.roles, name=peche)
-                    if not role_peche:
-                        print(f"[Erreur] Rôle '{peche}' introuvable.")
-                        players[peche] = "Place vacante"
-                        continue
-                    # Cherche un membre avec les 2 rôles
-                    joueur = None
-                    for member in guild.members:
-                        if role_pecheurs in member.roles and role_peche in member.roles:
-                            joueur = member
-                            break
-                    players[peche] = joueur.display_name if joueur else "Place vacante"
+            for peche in PECHE_S_CAPITAUX:
+                role_peche = discord.utils.get(guild.roles, name=peche)
+                if not role_peche:
+                    players[peche] = {"name": "Place vacante", "avatar": None}
+                    continue
 
+                joueur = None
+                for member in guild.members:
+                if role_pecheurs in member.roles and role_peche in member.roles:
+                    joueur = member
+                    break
+
+                if joueur:
+                    players[peche] = {
+                    "name": joueur.display_name,
+                    "avatar": joueur.avatar.url if joueur.avatar else joueur.default_avatar.url
+                    }
+                else:
+                    players[peche] = {"name": "Place vacante", "avatar": None}
             send_data_to_api(owner_name, players)
             print(
                 f"[Bot] Données envoyées avec succès - {len(players)} péchés traités"
@@ -230,6 +230,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
