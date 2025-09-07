@@ -80,14 +80,14 @@ async def periodic_task():
 
                 joueur = None
                 for member in guild.members:
-                if role_pecheurs in member.roles and role_peche in member.roles:
-                    joueur = member
-                    break
+                    if role_pecheurs in member.roles and role_peche in member.roles:
+                        joueur = member
+                        break
 
                 if joueur:
                     players[peche] = {
-                    "name": joueur.display_name,
-                    "avatar": joueur.avatar.url if joueur.avatar else joueur.default_avatar.url
+                        "name": joueur.display_name,
+                        "avatar": joueur.avatar.url if joueur.avatar else joueur.default_avatar.url
                     }
                 else:
                     players[peche] = {"name": "Place vacante", "avatar": None}
@@ -230,6 +230,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
