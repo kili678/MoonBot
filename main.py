@@ -106,30 +106,12 @@ async def periodic_task():
 
         await asyncio.sleep(60)
 
-async def auto_bump():
-    await bot.wait_until_ready()  # On attend que le bot soit prêt
-    while not bot.is_closed():
-        # Récupère le serveur et le salon "bot"
-        for guild in bot.guilds:
-            channel = discord.utils.get(guild.text_channels, name="「🤖」bot")
-            if channel:
-                try:
-                    await channel.send("/bump")
-                    print(f"[BUMP] /bump envoyé dans {guild.name}")
-                except Exception as e:
-                    print(f"[BUMP] Erreur : {e}")
-            else:
-                print(f"[BUMP] Erreur :channel pas trouvé")
-        # Attend 2 heures et 10 minutes (2*3600 + 10*60 = 7800 secondes)
-        await asyncio.sleep(7800)
-
 
 @bot.event
 async def on_ready():
     print(f"Bot connecté en tant que {bot.user}")
     print(f"Connecté à {len(bot.guilds)} serveur(s)")
     bot.loop.create_task(periodic_task())
-    bot.loop.create_task(auto_bump()) 
             
 @bot.event
 async def on_error(event, *args, **kwargs):
@@ -247,6 +229,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
