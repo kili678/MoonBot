@@ -111,7 +111,7 @@ async def auto_bump():
     while not bot.is_closed():
         # Récupère le serveur et le salon "bot"
         for guild in bot.guilds:
-            channel = discord.utils.get(guild.text_channels, name="bot")
+            channel = discord.utils.get(guild.text_channels, name="「🤖」bot")
             if channel:
                 try:
                     await channel.send("/bump")
@@ -245,6 +245,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
