@@ -118,6 +118,8 @@ async def auto_bump():
                     print(f"[BUMP] /bump envoyé dans {guild.name}")
                 except Exception as e:
                     print(f"[BUMP] Erreur : {e}")
+            else:
+                print(f"[BUMP] Erreur :channel pas trouvé")
         # Attend 2 heures et 10 minutes (2*3600 + 10*60 = 7800 secondes)
         await asyncio.sleep(7800)
 
@@ -245,6 +247,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
