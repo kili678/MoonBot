@@ -84,13 +84,13 @@ async def periodic_task():
                         joueur = member
                         break
                         
-                    if joueur:
-                        players[peche] = {
+                if joueur:
+                    players[peche] = {
                         "name": joueur.display_name,
                         "avatar": joueur.avatar.url if joueur.avatar else joueur.default_avatar.url
                     }
-                    else:
-                        players[peche] = {"name": "Place vacante", "avatar": None}
+                else:
+                    players[peche] = {"name": "Place vacante", "avatar": None}
             send_data_to_api(owner_name, players)
             print(
                 f"[Bot] Données envoyées avec succès - {len(players)} péchés traités"
@@ -229,6 +229,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
