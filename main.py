@@ -27,26 +27,6 @@ PECHE_S_CAPITAUX = [
 ]
 
 
-def send_data_to_api(owner_name, players_dict):
-    url = "https://siteapi-2.onrender.com/update"
-    payload = {
-        "owner": owner_name,
-        "players": players_dict  # 👈 On regroupe tout dans une clé "players"
-    }
-    try:
-        response = requests.post(url, json=payload, timeout=10)
-        if response.status_code == 200:
-            print(f"[API] ✅ Envoyé : owner={owner_name}")
-        else:
-            print(f"[API] ⚠️ Code {response.status_code} : {response.text}")
-    except requests.exceptions.Timeout:
-        print(f"[API] ⏱️ Timeout vers l'API")
-    except requests.exceptions.ConnectionError:
-        print(f"[API] 🔌 Erreur de connexion vers l'API")
-    except Exception as e:
-        print(f"[API] ❌ Erreur lors de l'envoi : {e}")
-
-
 async def periodic_task():
     await bot.wait_until_ready()
     print("[Bot] Tâche périodique démarrée")
@@ -235,6 +215,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
