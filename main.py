@@ -53,15 +53,11 @@ async def periodic_task():
 
     while not bot.is_closed():
         try:
-            # Vérifier que le bot est toujours connecté
             if not bot.is_ready():
-                print("[Bot] Bot non prêt, attente...")
                 await asyncio.sleep(10)
                 continue
 
-            # Vérifier qu'il y a au moins un serveur
             if not bot.guilds:
-                print("[Bot] Aucun serveur trouvé, attente...")
                 await asyncio.sleep(30)
                 continue
 
@@ -91,21 +87,31 @@ async def periodic_task():
                     }
                 else:
                     players[peche] = {"name": "Place vacante", "avatar": None}
-            send_data_to_api(owner_name, players)
-            print(
-                f"[Bot] Données envoyées avec succès - {len(players)} péchés traités"
-            )
 
-        except discord.errors.HTTPException as e:
-            print(f"[Erreur Discord] HTTP : {e}")
-            await asyncio.sleep(
-                30)  # Attendre plus longtemps en cas d'erreur Discord
+            # 👉 Récupérer les 3 derniers messages du salon annonces
+            annonces = await fetch_annonces_messages()
+
+            payload = {
+                "owner": owner_name,
+                "players": players,
+                "annonces": annonces  # 👈 On ajoute ça
+            }
+
+            url = "https://siteapi-2.onrender.com/update"
+            try:
+                response = requests.post(url, json=payload, timeout=10)
+                if response.status_code == 200:
+                    print(f"[API] ✅ Données envoyées (avec annonces)")
+                else:
+                    print(f"[API] ⚠️ Code {response.status_code} : {response.text}")
+            except Exception as e:
+                print(f"[API] ❌ Erreur envoi annonces : {e}")
+
         except Exception as e:
             print(f"[Erreur] tâche périodique : {e}")
-            print(f"[Debug] Type d'erreur : {type(e).__name__}")
 
         await asyncio.sleep(60)
-
+        
 
 @bot.event
 async def on_ready():
@@ -229,6 +235,7 @@ import threading
 threading.Thread(target=start).start()
 
 bot.run(token)
+
 
 
 
