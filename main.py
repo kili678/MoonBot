@@ -1,24 +1,28 @@
+# bot.py
 import os
 import discord
 from discord.ext import commands
 import requests
 import asyncio
-
+import threading
 from flask import Flask
 
+# --- KEEP-ALIVE (optionnel) ---
 app = Flask(__name__)
-
 @app.route('/')
 def home():
     return "Bot is alive!"
-
 def start():
-    port = int(os.environ.get("PORT", 10000))  # Port imposé par Render
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+threading.Thread(target=start).start()
+# -------------------------------
 
+# Intents (IMPORTANT: active Server Members Intent dans le portail Discord)
 intents = discord.Intents.default()
 intents.message_content = True
-intents = discord.Intents.all()
+intents.members = True
+
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 PECHEURS_ROLE = "Pécheurs"
@@ -26,17 +30,89 @@ PECHE_S_CAPITAUX = [
     "Luxure", "Colère", "Envie", "Paresse", "Orgueil", "Gourmandise", "Avarice"
 ]
 
+def find_role_by_name(guild, name):
+    """Recherche role case-insensitive"""
+    return discord.utils.find(lambda r: r.name.lower() == name.lower(), guild.roles)
+
+async def fetch_annonces_messages():
+    """Récupère les 3 derniers messages du salon '「📆」annonces' (texte + avatar + attachments)"""
+    await bot.wait_until_ready()
+    if not bot.guilds:
+        print("[fetch_annonces] Aucun serveur connecté.")
+        return []
+
+    guild = bot.guilds[0]
+    channel = discord.utils.get(guild.text_channels, name="「📆」annonces")
+    if not channel:
+        print("[fetch_annonces] Salon '「📆」annonces' introuvable.")
+        return []
+
+    messages_data = []
+    async for msg in channel.history(limit=3):
+        try:
+            avatar = msg.author.display_avatar.url
+        except Exception:
+            avatar = msg.author.avatar.url if msg.author.avatar else msg.author.default_avatar.url
+        attachments = [a.url for a in msg.attachments] if msg.attachments else []
+        messages_data.append({
+            "author_name": msg.author.display_name,
+            "author_avatar": avatar,
+            "content": msg.content,
+            "attachments": attachments
+        })
+    return messages_data
+
+async def build_players(guild):
+    """Construit le dict players (nom + avatar) en cherchant les membres ayant les deux rôles."""
+    role_pecheurs = find_role_by_name(guild, PECHEURS_ROLE)
+    if not role_pecheurs:
+        print("[build_players] Role 'Pécheurs' introuvable sur le serveur !")
+
+    players = {}
+    for peche in PECHE_S_CAPITAUX:
+        role_peche = find_role_by_name(guild, peche)
+        if not role_peche:
+            print(f"[build_players] Role '{peche}' introuvable.")
+            players[peche] = {"name": "Place vacante", "avatar": None}
+            continue
+
+        joueur = None
+
+        # 1) essaye cache
+        for member in guild.members:
+            if role_pecheurs in member.roles and role_peche in member.roles:
+                joueur = member
+                break
+
+        # 2) fallback fetch si pas trouvé (nécessite intent membres activé)
+        if not joueur:
+            try:
+                async for member in guild.fetch_members(limit=None):
+                    if role_pecheurs in member.roles and role_peche in member.roles:
+                        joueur = member
+                        break
+            except Exception as e:
+                print(f"[build_players] Erreur fetch_members: {e}")
+
+        if joueur:
+            try:
+                avatar = joueur.display_avatar.url
+            except Exception:
+                avatar = joueur.avatar.url if joueur.avatar else joueur.default_avatar.url
+            players[peche] = {"name": joueur.display_name, "avatar": avatar}
+        else:
+            players[peche] = {"name": "Place vacante", "avatar": None}
+
+    return players
 
 async def periodic_task():
     await bot.wait_until_ready()
     print("[Bot] Tâche périodique démarrée")
-
     while not bot.is_closed():
         try:
             if not bot.is_ready():
                 await asyncio.sleep(10)
                 continue
-
             if not bot.guilds:
                 await asyncio.sleep(30)
                 continue
@@ -45,43 +121,24 @@ async def periodic_task():
             owner_name = app_info.owner.name
 
             guild = bot.guilds[0]
-            role_pecheurs = discord.utils.get(guild.roles, name=PECHEURS_ROLE)
 
-            players = {}
-            for peche in PECHE_S_CAPITAUX:
-                role_peche = discord.utils.get(guild.roles, name=peche)
-                if not role_peche:
-                    players[peche] = {"name": "Place vacante", "avatar": None}
-                    continue
-                    
-                joueur = None
-                for member in guild.members:
-                    if role_pecheurs in member.roles and role_peche in member.roles:
-                        joueur = member
-                        break
-                        
-                if joueur:
-                    players[peche] = {
-                        "name": joueur.display_name,
-                        "avatar": joueur.avatar.url if joueur.avatar else joueur.default_avatar.url
-                    }
-                else:
-                    players[peche] = {"name": "Place vacante", "avatar": None}
+            # build players (robuste)
+            players = await build_players(guild)
 
-            # 👉 Récupérer les 3 derniers messages du salon annonces
+            # récupérer 3 dernières annonces
             annonces = await fetch_annonces_messages()
 
             payload = {
                 "owner": owner_name,
                 "players": players,
-                "annonces": annonces  # 👈 On ajoute ça
+                "annonces": annonces
             }
 
-            url = "https://siteapi-2.onrender.com/update"
+            url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
             try:
                 response = requests.post(url, json=payload, timeout=10)
                 if response.status_code == 200:
-                    print(f"[API] ✅ Données envoyées (avec annonces)")
+                    print("[API] ✅ Données envoyées (avec annonces)")
                 else:
                     print(f"[API] ⚠️ Code {response.status_code} : {response.text}")
             except Exception as e:
@@ -91,142 +148,63 @@ async def periodic_task():
             print(f"[Erreur] tâche périodique : {e}")
 
         await asyncio.sleep(60)
-        
 
 @bot.event
 async def on_ready():
     print(f"Bot connecté en tant que {bot.user}")
     print(f"Connecté à {len(bot.guilds)} serveur(s)")
     bot.loop.create_task(periodic_task())
-            
-@bot.event
-async def on_error(event, *args, **kwargs):
-    print(f"[Erreur Bot] Événement {event} : {args}")
 
-
-@bot.event
-async def on_disconnect():
-    print("[Bot] Déconnecté de Discord")
-
-
-@bot.event
-async def on_resumed():
-    print("[Bot] Reconnecté à Discord")
-    
-@bot.event
-async def on_message(message):
-    # Empêche le bot de répondre à lui-même
-    if message.author == bot.user:
-        return
-
-    if "bonjour" in message.content.lower():
-        await message.channel.send(f"Bonjour {message.author} ! 🤗")
-
-    if "fafa" in message.content.lower():
-        await message.add_reaction("🍆")  # Correction ici
-        
-    if "zeleph" in message.content.lower():
-        await message.add_reaction("🦊")  # Correction ici
-
-    if "killian" in message.content.lower():
-        await message.add_reaction("🥵")  # Correction ici
-
-    if "nuggets" in message.content.lower():
-        await message.add_reaction("🐔")  # Correction ici
-
-    if "kuzoki" in message.content.lower():
-        await message.add_reaction("🐺")  # Correction ici
-
-    if "noisette" in message.content.lower():
-        await message.add_reaction("🌰")  # Correction ici
-
-    if "pigeon" in message.content.lower():
-        await message.add_reaction("🐤")  # Correction ici
-
-    if "piaf" in message.content.lower():
-        await message.add_reaction("🐤")  # Correction ici
-        
-    if "sakir" in message.content.lower():
-        await message.add_reaction("🦝")
-        
-    # Si le bot est mentionné
-    if bot.user in message.mentions:
-        await message.channel.send(
-            f"Oui {message.author.mention} ?"
-        )
-
-    # Permet au bot de traiter les commandes si besoin
-    await bot.process_commands(message)
-    
 @bot.command(name="classement")
 async def classement(ctx):
     guild = ctx.guild
-
     classement = []
-
     for peche in PECHE_S_CAPITAUX:
-        role_peche = discord.utils.get(guild.roles, name=peche)
+        role_peche = find_role_by_name(guild, peche)
         if not role_peche:
             classement.append((peche, 0))
             continue
-
         count = len(role_peche.members)
+        if count == 0:
+            # fallback : fetch members
+            count = 0
+            try:
+                async for m in guild.fetch_members(limit=None):
+                    if role_peche in m.roles:
+                        count += 1
+            except Exception as e:
+                print(f"[classement] fetch_members erreur: {e}")
         classement.append((peche, count))
-
-    # Trie le classement par nombre décroissant
     classement.sort(key=lambda x: x[1], reverse=True)
-
-    # Formatage du message
     msg = "**Classement des péchés capitaux (par nombre de membres) :**\n"
     for i, (peche, count) in enumerate(classement, 1):
         msg += f"**{i}. {peche}** — {count} membre(s)\n"
+    await ctx.send(msg)
 
-    await ctx.send(msg)      
-    
-@bot.command()
-@commands.is_owner()  # seule la personne propriétaire du bot peut utiliser
-async def reload(ctx, extension: str = None):
-    """Recharge une extension ou toutes"""
-    if extension:
-        try:
-            await bot.reload_extension(f"cogs.{extension}")
-            await ctx.send(f"✅ Extension `{extension}` rechargée.")
-        except Exception as e:
-            await ctx.send(f"❌ Erreur en rechargant `{extension}`: `{e}`")
-    else:
-        reloaded = []
-        for filename in os.listdir("./cogs"):
-            if filename.endswith(".py"):
-                try:
-                    await bot.reload_extension(f"cogs.{filename[:-3]}")
-                    reloaded.append(filename)
-                except Exception as e:
-                    await ctx.send(f"❌ Erreur dans `{filename}`: `{e}`")
-        await ctx.send(f"✅ Extensions rechargées : {', '.join(reloaded)}")
+# Optional: commande manuelle pour forcer l'envoi et debug
+@bot.command(name="moon.update")
+@commands.is_owner()
+async def force_update(ctx):
+    await ctx.send("Envoi manuel en cours...")
+    guild = ctx.guild or (bot.guilds[0] if bot.guilds else None)
+    if not guild:
+        await ctx.send("Aucun serveur disponible.")
+        return
+    app_info = await bot.application_info()
+    owner_name = app_info.owner.name
+    players = await build_players(guild)
+    annonces = await fetch_annonces_messages()
+    payload = {"owner": owner_name, "players": players, "annonces": annonces}
+    url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
+    try:
+        r = requests.post(url, json=payload, timeout=10)
+        await ctx.send(f"API status: {r.status_code}")
+    except Exception as e:
+        await ctx.send(f"Erreur envoi: {e}")
 
+# Token & run
 token = os.environ.get('TOKEN')
-print("TOKEN chargé ? ", 'TOKEN' in os.environ)
-print("Longueur du token :", len(os.environ.get('TOKEN', '')))
 if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
-    
-import threading
-threading.Thread(target=start).start()
-
 bot.run(token)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
