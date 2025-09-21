@@ -29,6 +29,7 @@ PECHEURS_ROLE = "Pécheurs"
 PECHE_S_CAPITAUX = [
     "Luxure", "Colère", "Envie", "Paresse", "Orgueil", "Gourmandise", "Avarice"
 ]
+JEUX_ROLES = ["Valorant", "Genshin Impact", "Resident evil", "Minecraft", "Red Dead", "Roblox", "Jeux indépendants"]
 
 def find_role_by_name(guild, name):
     """Recherche role case-insensitive"""
@@ -127,6 +128,27 @@ async def build_classement(guild):
     classement.sort(key=lambda x: x["count"], reverse=True)
     return classement
 
+async def build_classement_jeux(guild):
+    """Construit le classement des jeux (par nombre de membres dans chaque rôle)"""
+    classement = []
+    for jeu in JEUX_ROLES:
+        role_jeu = find_role_by_name(guild, jeu)
+        if not role_jeu:
+            classement.append({"jeu": jeu, "count": 0})
+            continue
+        count = len(role_jeu.members)
+        if count == 0:
+            # fallback si jamais
+            try:
+                async for m in guild.fetch_members(limit=None):
+                    if role_jeu in m.roles:
+                        count += 1
+            except Exception as e:
+                print(f"[build_classement_jeux] fetch_members erreur: {e}")
+        classement.append({"jeu": jeu, "count": count})
+    classement.sort(key=lambda x: x["count"], reverse=True)
+    return classement
+    
 async def periodic_task():
     await bot.wait_until_ready()
     print("[Bot] Tâche périodique démarrée")
@@ -152,11 +174,14 @@ async def periodic_task():
 
             classement = await build_classement(guild)
 
+            classement_jeux = await build_classement_jeux(guild)
+
             payload = {
                 "owner": owner_name,
                 "players": players,
                 "annonces": annonces,
                 "ClassementPeche": classement
+                "ClassementJeux": classement_jeux
             }
 
             url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
@@ -205,7 +230,15 @@ async def classement(ctx):
     for i, (peche, count) in enumerate(classement, 1):
         msg += f"**{i}. {peche}** — {count} membre(s)\n"
     await ctx.send(msg)
-
+    
+@bot.command(name="classement-jeux")
+async def classement_jeux(ctx):
+    guild = ctx.guild
+    classement = await build_classement_jeux(guild)
+    msg = "**Classement des jeux (par nombre de membres) :**\n"
+    for i, entry in enumerate(classement, 1):
+        msg += f"**{i}. {entry['jeu']}** — {entry['count']} membre(s)\n"
+    await ctx.send(msg)
 # Optional: commande manuelle pour forcer l'envoi et debug
 @bot.command(name="moon.update")
 @commands.is_owner()
@@ -234,4 +267,5 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
