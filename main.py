@@ -180,8 +180,8 @@ async def periodic_task():
                 "owner": owner_name,
                 "players": players,
                 "annonces": annonces,
-                "ClassementPeche": classement
-                "ClassementJeux": classement_jeux
+                "ClassementPeche": classement,
+                "ClassementJeux": classement_jeux,
             }
 
             url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
@@ -267,5 +267,6 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
