@@ -105,6 +105,28 @@ async def build_players(guild):
 
     return players
 
+async def build_classement(guild):
+    """Construit le classement des péchés capitaux (comme la commande !classement)"""
+    classement = []
+    for peche in PECHE_S_CAPITAUX:
+        role_peche = find_role_by_name(guild, peche)
+        if not role_peche:
+            classement.append({"peche": peche, "count": 0})
+            continue
+        count = len(role_peche.members)
+        if count == 0:
+            # fallback : fetch members
+            try:
+                async for m in guild.fetch_members(limit=None):
+                    if role_peche in m.roles:
+                        count += 1
+            except Exception as e:
+                print(f"[build_classement] fetch_members erreur: {e}")
+        classement.append({"peche": peche, "count": count})
+    # tri décroissant
+    classement.sort(key=lambda x: x["count"], reverse=True)
+    return classement
+
 async def periodic_task():
     await bot.wait_until_ready()
     print("[Bot] Tâche périodique démarrée")
@@ -128,10 +150,13 @@ async def periodic_task():
             # récupérer 3 dernières annonces
             annonces = await fetch_annonces_messages()
 
+            classement = await build_classement(guild)
+
             payload = {
                 "owner": owner_name,
                 "players": players,
-                "annonces": annonces
+                "annonces": annonces,
+                "ClassementPeche": classement
             }
 
             url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
@@ -194,7 +219,8 @@ async def force_update(ctx):
     owner_name = app_info.owner.name
     players = await build_players(guild)
     annonces = await fetch_annonces_messages()
-    payload = {"owner": owner_name, "players": players, "annonces": annonces}
+    classement = await build_classement(guild)
+    payload = {"owner": owner_name, "players": players, "annonces": annonces, "ClassementPeche": classement}
     url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
     try:
         r = requests.post(url, json=payload, timeout=10)
@@ -208,3 +234,4 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
