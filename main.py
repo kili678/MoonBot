@@ -5,6 +5,7 @@ from discord.ext import commands
 import requests
 import asyncio
 import threading
+import random
 from flask import Flask
 
 # --- KEEP-ALIVE (optionnel) ---
@@ -281,6 +282,7 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
 
