@@ -239,6 +239,13 @@ async def classement_jeux(ctx):
     for i, entry in enumerate(classement, 1):
         msg += f"**{i}. {entry['jeu']}** — {entry['count']} membre(s)\n"
     await ctx.send(msg)
+    
+@bot.command(name="tg")
+async def tg(ctx):
+    guild = ctx.guild
+    classement = await build_classement_jeux(guild)
+    msg = "**tg avec ton goumin de con tfaçon c'est qu'une pute**\n"
+    await ctx.send(msg)
 # Optional: commande manuelle pour forcer l'envoi et debug
 @bot.command(name="moon.update")
 @commands.is_owner()
@@ -267,6 +274,7 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
 
