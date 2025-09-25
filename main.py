@@ -106,7 +106,36 @@ async def build_players(guild):
             players[peche] = {"name": "Place vacante", "avatar": None}
 
     return players
+    
+async def build_apotres(guild):
+    """Construit le dict apotres (plusieurs membres possibles par péché)."""
+    role_apotre = find_role_by_name(guild, "Apotre")
+    if not role_apotre:
+        print("[build_apotres] Rôle 'Apotre' introuvable !")
+        return {peche: [] for peche in PECHE_S_CAPITAUX}
 
+    apotres = {peche: [] for peche in PECHE_S_CAPITAUX}
+
+    for peche in PECHE_S_CAPITAUX:
+        role_peche = find_role_by_name(guild, peche)
+        if not role_peche:
+            print(f"[build_apotres] Rôle '{peche}' introuvable.")
+            continue
+
+        # Cherche tous les membres avec Apotre + péché
+        for member in guild.members:
+            if role_apotre in member.roles and role_peche in member.roles:
+                try:
+                    avatar = member.display_avatar.url
+                except Exception:
+                    avatar = member.avatar.url if member.avatar else member.default_avatar.url
+                apotres[peche].append({
+                    "name": member.display_name,
+                    "avatar": avatar
+                })
+
+    return apotres
+    
 async def build_classement(guild):
     """Construit le classement des péchés capitaux (comme la commande !classement)"""
     classement = []
@@ -177,14 +206,17 @@ async def periodic_task():
 
             classement_jeux = await build_classement_jeux(guild)
 
+            apotres = await build_apotres(guild)
+
             payload = {
                 "owner": owner_name,
                 "players": players,
+                "apotres": apotres,
                 "annonces": annonces,
                 "ClassementPeche": classement,
                 "ClassementJeux": classement_jeux,
             }
-
+            
             url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
             try:
                 response = requests.post(url, json=payload, timeout=10)
@@ -282,6 +314,7 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
 
