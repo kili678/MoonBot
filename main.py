@@ -136,6 +136,29 @@ async def build_apotres(guild):
 
     return apotres
     
+async def build_membres(guild):
+    role_membres = find_role_by_name(guild, "Membres")
+    if not role_membres:
+        print("[build_membres] Role 'Membres' introuvable.")
+        return []
+
+    membres_list = []
+    for member in guild.members:
+        if role_membres in member.roles:
+            try:
+                avatar = member.display_avatar.url
+            except Exception:
+                avatar = member.avatar.url if member.avatar else member.default_avatar.url
+
+            roles = [r.name for r in member.roles if r.name != "@everyone"]
+            membres_list.append({
+                "name": member.display_name,
+                "avatar": avatar,
+                "roles": roles
+            })
+            
+    return membres_list
+    
 async def build_classement(guild):
     """Construit le classement des péchés capitaux (comme la commande !classement)"""
     classement = []
@@ -207,6 +230,8 @@ async def periodic_task():
             classement_jeux = await build_classement_jeux(guild)
 
             apotres = await build_apotres(guild)
+            
+            membres = await build_membres(guild)
 
             payload = {
                 "owner": owner_name,
@@ -215,6 +240,7 @@ async def periodic_task():
                 "annonces": annonces,
                 "ClassementPeche": classement,
                 "ClassementJeux": classement_jeux,
+                "membres": membres,
             }
             
             url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
@@ -299,8 +325,24 @@ async def force_update(ctx):
     owner_name = app_info.owner.name
     players = await build_players(guild)
     annonces = await fetch_annonces_messages()
+
     classement = await build_classement(guild)
-    payload = {"owner": owner_name, "players": players, "annonces": annonces, "ClassementPeche": classement}
+
+    classement_jeux = await build_classement_jeux(guild)
+
+    apotres = await build_apotres(guild)
+            
+    membres = await build_membres(guild)
+
+    payload = {
+        "owner": owner_name,
+        "players": players,
+        "apotres": apotres,
+        "annonces": annonces,
+        "ClassementPeche": classement,
+        "ClassementJeux": classement_jeux,
+        "membres": membres,
+    }
     url = os.environ.get("API_URL", "https://siteapi-2.onrender.com/update")
     try:
         r = requests.post(url, json=payload, timeout=10)
@@ -314,6 +356,7 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
 
