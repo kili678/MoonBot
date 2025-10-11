@@ -153,6 +153,7 @@ async def build_membres(guild):
             roles = [r.name for r in member.roles if r.name != "@everyone"]
             membres_list.append({
                 "name": member.display_name,
+                "realname": member.name,
                 "avatar": avatar,
                 "roles": roles
             })
@@ -356,6 +357,7 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
 
