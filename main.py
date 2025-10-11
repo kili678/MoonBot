@@ -256,7 +256,7 @@ async def periodic_task():
         except Exception as e:
             print(f"[Erreur] tâche périodique : {e}")
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(300)
 
 @bot.event
 async def on_ready():
@@ -356,6 +356,7 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
 
