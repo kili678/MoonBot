@@ -302,10 +302,14 @@ async def classement_jeux(ctx):
     
 @bot.command(name="tg")
 async def tg(ctx):
-    guild = ctx.guild
-    classement = await build_classement_jeux(guild)
     msg = "**tg avec ton goumin de con tfaçon c'est qu'une pute**\n"
     await ctx.send(msg)
+    
+@bot.command(name="phoebe")
+async def tg(ctx):
+    msg = "https://tenor.com/view/want-demand-gif-12030398"
+    await ctx.send(msg)
+    
 @bot.command(name ="love")
 async def love(ctx, member: discord.Member):
     # Générer un pourcentage aléatoire
@@ -357,6 +361,7 @@ if not token:
     print("Erreur : variable d'environnement TOKEN absente ou vide.")
     exit(1)
 bot.run(token)
+
 
 
 
